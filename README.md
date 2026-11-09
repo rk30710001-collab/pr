@@ -59,7 +59,7 @@ Go to **Settings → Environment Variables** and add:
 | Name | Value |
 |---|---|
 | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | `BLzYWjcbQSyznxN8Hec-cUqyx2TTtA-GO3LHrSV0wcOQF21ZE_3gywu1RCTyf5CoghBBFaFZWVrWKOWaLkNBGFg` |
-| `VAPID_PRIVATE_KEY` | `fqzAbv1Em6V4rqWpNj2R-GvsBAdpgNOzpq80JKC2xnA` |
+| `VAPID_PRIVATE_KEY` | `Generate your own VAPID keys using npm run generate-vapid-keys.` |
 | `VAPID_SUBJECT` | `mailto:your-email@example.com` (any real email, used only for push-service contact info) |
 | `CRON_SECRET` | make up any random string, e.g. `prakriti-morning-7294` |
 
