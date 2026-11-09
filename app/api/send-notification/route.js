@@ -1,3 +1,4 @@
+
 import { Redis } from "@upstash/redis";
 import webpush from "web-push";
 import { NextResponse } from "next/server";
@@ -16,13 +17,61 @@ function getRedis() {
   return new Redis({ url, token });
 }
 
-function getTodaysQuote() {
-  const start = new Date(new Date().getFullYear(), 0, 0);
+// Get current date and time in India
+function getIndiaTime() {
   const now = new Date();
 
-  const dayOfYear = Math.floor(
-    (now - start) / (1000 * 60 * 60 * 24)
+  const parts = new Intl.DateTimeFormat("en-IN", {
+    timeZone: "Asia/Kolkata",
+    hour: "numeric",
+    hourCycle: "h23",
+  }).formatToParts(now);
+
+  const hour = Number(
+    parts.find((part) => part.type === "hour").value
   );
+
+  return hour;
+}
+
+// Time-based greeting
+function getGreeting() {
+  const hour = getIndiaTime();
+
+  if (hour >= 5 && hour < 12) {
+    return "Good Morning";
+  }
+
+  if (hour >= 12 && hour < 17) {
+    return "Good Afternoon";
+  }
+
+  if (hour >= 17 && hour < 21) {
+    return "Good Evening";
+  }
+
+  return "Good Night";
+}
+
+// Get today's quote using India date
+function getTodaysQuote() {
+  const dateParts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+  }).formatToParts(new Date());
+
+  const year = Number(dateParts.find(p => p.type === "year").value);
+  const month = Number(dateParts.find(p => p.type === "month").value);
+  const day = Number(dateParts.find(p => p.type === "day").value);
+
+  const start = new Date(Date.UTC(year, 0, 1));
+  const today = new Date(Date.UTC(year, month - 1, day));
+
+  const dayOfYear = Math.floor(
+    (today - start) / (1000 * 60 * 60 * 24)
+  ) + 1;
 
   return quotes[dayOfYear % quotes.length];
 }
@@ -74,10 +123,13 @@ export async function GET(request) {
 
     // Prepare notification
     const quote = getTodaysQuote();
+    const greeting = getGreeting();
 
     const payload = JSON.stringify({
-      title: "Good morning, Prakriti 💚",
+      title: `${greeting}, Prakriti 💚`,
       body: quote,
+      icon: "/photo.jpg",
+      image: "/photo2.jpg",
       url: "/"
     });
 
@@ -85,6 +137,7 @@ export async function GET(request) {
 
     return NextResponse.json({
       ok: true,
+      title: `${greeting}, Prakriti 💚`,
       sent: quote
     });
 

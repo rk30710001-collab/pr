@@ -1,41 +1,59 @@
-// Service worker: receives the push event from the server and shows the
-// notification on the phone/browser. This file must live at the site root
-// (public/sw.js -> served at /sw.js) so its scope covers the whole site.
 
 self.addEventListener("push", (event) => {
-  let data = { title: "Good morning 💛", body: "Thinking of you.", url: "/" };
+  let data = {
+    title: "A little note for you 💗",
+    body: "Thinking of you. 💕",
+    url: "/",
+    image: "/photo2.jpg",
+  };
+
   try {
     if (event.data) {
-      data = event.data.json();
+      data = {
+        ...data,
+        ...event.data.json(),
+      };
     }
-  } catch (e) {
-    // fall back to default above
+  } catch (error) {
+    console.error("Push notification data error:", error);
   }
 
   const options = {
     body: data.body,
-    icon: "/icon-192.png",
+    icon: data.icon || "/photo.jpg",
     badge: "/icon-192.png",
-    image: data.image || undefined,
-    tag: "morning-love-note", // replaces any previous notification instead of stacking
+    image: data.image || "/photo2.jpg",
+    tag: "morning-love-note",
     renotify: true,
-    data: { url: data.url || "/" },
+    data: {
+      url: data.url || "/",
+    },
   };
 
-  event.waitUntil(self.registration.showNotification(data.title, options));
+  event.waitUntil(
+    self.registration.showNotification(data.title, options)
+  );
 });
 
-// Tapping the notification opens (or focuses) the site.
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
+
   const url = event.notification.data?.url || "/";
+
   event.waitUntil(
-    clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
+    clients.matchAll({
+      type: "window",
+      includeUncontrolled: true,
+    }).then((clientList) => {
       for (const client of clientList) {
-        if (client.url.includes(self.location.origin) && "focus" in client) {
+        if (
+          client.url.startsWith(self.location.origin) &&
+          "focus" in client
+        ) {
           return client.focus();
         }
       }
+
       if (clients.openWindow) {
         return clients.openWindow(url);
       }
